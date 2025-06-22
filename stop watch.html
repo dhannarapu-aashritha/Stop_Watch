@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Stopwatch and Clock - Done By Dhannarapu Aashritha</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500&display=swap');
+
+  body {
+    margin: 0;
+    padding: 2rem;
+    font-family: 'Roboto Mono', monospace;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    box-sizing: border-box;
+  }
+
+  h1 {
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  }
+
+  .container {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 2rem 3rem;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 320px;
+  }
+
+  .clock, .stopwatch {
+    margin: 1rem 0;
+    text-align: center;
+  }
+
+  .display {
+    font-size: 3.2rem;
+    letter-spacing: 0.1em;
+    padding: 0.5rem 1.5rem;
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    min-width: 14rem;
+    user-select: none;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+  }
+
+  .buttons {
+    margin-top: 1rem;
+  }
+
+  button {
+    background: #764ba2;
+    border: none;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    margin: 0 0.5rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(118,75,162,0.6);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+
+  button:hover {
+    background: #667eea;
+    transform: translateY(-2px);
+  }
+
+  button:active {
+    transform: translateY(1px);
+  }
+
+  @media (max-width: 400px) {
+    .container {
+      padding: 2rem 1.5rem;
+    }
+    .display {
+      font-size: 2.4rem;
+      min-width: 12rem;
+    }
+  }
+
+  footer {
+    margin-top: auto;
+    font-size: 0.8rem;
+    color: #ddd;
+  }
+
+</style>
+</head>
+<body>
+
+  <h1>Stopwatch &amp; Clock</h1>
+
+  <div class="container">
+
+    <div class="clock">
+      <h2>Current Time</h2>
+      <div id="clockDisplay" class="display">--:--:--</div>
+    </div>
+
+    <div class="stopwatch">
+      <h2>Stopwatch</h2>
+      <div id="stopwatchDisplay" class="display">00:00:00</div>
+      <div class="buttons">
+        <button id="startBtn">Start</button>
+        <button id="stopBtn" disabled>Stop</button>
+        <button id="resetBtn" disabled>Reset</button>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    Done By Dhannarapu Aashritha
+  </footer>
+
+<script>
+  // Clock functionality
+  function updateClock() {
+    const clockDisplay = document.getElementById('clockDisplay');
+    const now = new Date();
+    
+    // Adjusting for Indian Standard Time (UTC+5:30)
+    const utcOffset = 5.5 * 60 * 60 * 1000; // 5 hours 30 minutes in milliseconds
+    const istTime = new Date(now.getTime() + utcOffset);
+    
+    const hours = istTime.getHours().toString().padStart(2, '0');
+    const minutes = istTime.getMinutes().toString().padStart(2, '0');
+    const seconds = istTime.getSeconds().toString().padStart(2, '0');
+    
+    clockDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+  }
+  setInterval(updateClock, 1000);
+  updateClock(); // initial call
+
+  // Stopwatch functionality
+  let stopwatchInterval = null;
+  let elapsedTime = 0; // in milliseconds
+  let running = false;
+
+  const stopwatchDisplay = document.getElementById('stopwatchDisplay');
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const resetBtn = document.getElementById('resetBtn');
+
+  function formatTime(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
+    const minutes = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
+    const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
+  }
+
+  function updateStopwatch() {
+    elapsedTime += 1000;
+    stopwatchDisplay.textContent = formatTime(elapsedTime);
+  }
+
+  startBtn.addEventListener('click', () => {
+    if (!running) {
+      running = true;
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+      resetBtn.disabled = false;
+      // Update every second
+      stopwatchInterval = setInterval(updateStopwatch, 1000);
+    }
+  });
+
+  stopBtn.addEventListener('click', () => {
+    if (running) {
+      running = false;
+      clearInterval(stopwatchInterval);
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+      resetBtn.disabled = false;
+    }
+  });
+
+  resetBtn.addEventListener('click', () => {
+    running = false;
+    clearInterval(stopwatchInterval);
+    elapsedTime = 0;
+    stopwatchDisplay.textContent = "00:00:00";
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    resetBtn.disabled = true;
+  });
+
+  // Initialize button states
+  stopBtn.disabled = true;
+  resetBtn.disabled = true;
+
+</script>
+
+</body>
+</html>
